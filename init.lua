@@ -42,6 +42,11 @@ if vim.fn.has 'wsl' == 1 then
   }
 end
 
+-- folds
+vim.opt.foldmethod = 'expr'
+vim.opt.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+vim.opt.foldlevel = 99
+
 -- Enable break indent
 vim.opt.breakindent = true
 
@@ -85,6 +90,7 @@ vim.opt.scrolloff = 10
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
+-- Center screen on large navigation movements
 vim.keymap.set('n', '<C-d>', '<C-d>zz')
 vim.keymap.set('n', '<C-f>', '<C-f>zz')
 vim.keymap.set('n', '<C-u>', '<C-u>zz')
@@ -151,6 +157,7 @@ vim.opt.rtp:prepend(lazypath)
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
+  'tpope/vim-fugitive', -- Detect tabstop and shiftwidth automatically
 
   { 'kylechui/nvim-surround', opts = {} },
 
