@@ -45,6 +45,10 @@ vim.opt.foldlevel = 99
 -- Enable break indent
 vim.opt.breakindent = true
 
+-- Set nice wrapping
+vim.opt.wrap = true
+vim.opt.linebreak = true
+
 -- Save undo history
 vim.opt.undofile = true
 
@@ -91,9 +95,15 @@ vim.keymap.set('n', '<C-f>', '<C-f>zz')
 vim.keymap.set('n', '<C-u>', '<C-u>zz')
 vim.keymap.set('n', '<C-b>', '<C-b>zz')
 
+-- Replace triple hyphen with emdash
+vim.keymap.set('i', '---', '—')
+
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
 vim.opt.hlsearch = true
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+
+-- Toggle Zen Mode
+vim.keymap.set('n', '<leader>z', '<CMD>ZenMode<CR>', { desc = 'Toggle [Z]enMode' })
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
@@ -114,6 +124,17 @@ vim.keymap.set('n', '<leader>lr', '<CMD>lua vim.lsp.buf.rename()<CR>', { desc = 
 -- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
 -- or just use <C-\><C-n> to exit terminal mode
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+
+-- :DiffOrig
+vim.api.nvim_create_user_command('DiffOrig', function()
+  vim.cmd 'vert new'
+  vim.cmd 'set buftype=nofile'
+  vim.cmd 'read ++edit #'
+  vim.cmd '0d_'
+  vim.cmd 'diffthis'
+  vim.cmd 'wincmd p'
+  vim.cmd 'diffthis'
+end, {})
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -151,15 +172,36 @@ require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
   'tpope/vim-fugitive',
-  'kamykn/spelunker.vim', -- spell check code
+  'kamykn/spelunker.vim',
 
-  -- NOTE: Plugins can also be added by using a table,
-  -- with the first argument being the link and the following
-  -- keys can be used to configure plugin behavior/loading/etc.
-  --
-  -- Use `opts = {}` to force a plugin to be loaded.
-  --  This is equivalent to:
-  --    require('Comment').setup({})
+  {
+    'folke/zen-mode.nvim',
+    opts = {
+      window = {
+        backdrop = 99, -- shade the backdrop of the Zen window. Set to 1 to keep the same as Normal
+        -- height and width can be:
+        -- * an absolute number of cells when > 1
+        -- * a percentage of the width / height of the editor when <= 1
+        -- * a function that returns the width or the height
+        width = 120, -- width of the Zen window
+        height = 1, -- height of the Zen window
+        -- by default, no options are changed for the Zen window
+        -- uncomment any of the options below, or add other vim.wo options you want to apply
+        options = {
+          signcolumn = 'no', -- disable signcolumn
+          -- number = false, -- disable number column
+          -- relativenumber = false, -- disable relative numbers
+          -- cursorline = false, -- disable cursorline
+          -- cursorcolumn = false, -- disable cursor column
+          foldcolumn = '0', -- disable fold column
+          -- list = false, -- disable whitespace characters
+        },
+      },
+      plugins = {
+        gitsigns = { enabled = false },
+      },
+    },
+  },
 
   { 'kylechui/nvim-surround', opts = {} },
 
@@ -405,9 +447,6 @@ require('lazy').setup({
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
         callback = function(event)
-          -- NOTE: Remember that Lua is a real programming language, and as such it is possible
-          -- to define small helper and utility functions so you don't have to repeat yourself.
-          --
           -- In this case, we create a function that lets us more easily define mappings specific
           -- for LSP related items. It sets the mode, buffer and description for us each time.
           local map = function(keys, func, desc)
@@ -519,6 +558,55 @@ require('lazy').setup({
         ts_ls = {},
         cssls = {},
         cssmodules_ls = {},
+        -- harper is pretty good for spell checking, but very noisy. Disabling it for now
+        -- harper_ls = {
+        --   filetypes = {
+        --     'c',
+        --     'cpp',
+        --     'cs',
+        --     'go',
+        --     'html',
+        --     'java',
+        --     'javascript',
+        --     'lua',
+        --     'nix',
+        --     'python',
+        --     'ruby',
+        --     'rust',
+        --     'swift',
+        --     'toml',
+        --     'typescript',
+        --     'typescriptreact',
+        --     'haskell',
+        --     'cmake',
+        --     'typst',
+        --     'php',
+        --     'dart',
+        --   },
+        --   settings = {
+        --     ['harper-ls'] = {
+        --       userDictPath = '~/.config/nvim/dict.txt',
+        --       linters = {
+        --         OxfordComma = false,
+        --         Dashes = false,
+        --         SentenceCapitalization = false,
+        --         SpellCheck = false,
+        --       },
+        --     },
+        --   },
+        -- },
+        -- harper_ls = {
+        --   -- NOTE: asciidoc isn't currently supported, but I want it
+        --   filetypes = { 'markdown', 'text', 'asciidoc', 'gitcommit' },
+        --   settings = {
+        --     ['harper-ls'] = {
+        --       userDictPath = '~/.config/nvim/dict.txt',
+        --       linters = {
+        --         OxfordComma = false,
+        --       },
+        --     },
+        --   },
+        -- },
         -- lua_ls = {
         --   -- cmd = {...},
         --   -- filetypes = { ...},
